@@ -512,3 +512,10 @@ Rb-family loss
 ```
 
 The README should be updated whenever the pipeline thresholds, input datasets, or final candidate-ranking logic change.
+
+
+## License
+
+This project is licensed under the MIT License. See the `LICENSE` file for details.
+
+Raw datasets and third-party data sources are not included in this repository and remain subject to their original terms and licenses.
