@@ -1,0 +1,47 @@
+@"
+# Raw and large data
+Project/Data/Raw/
+Project/Data/Processed/
+Project/New_Data/
+Project/New_Data_2/
+Project/MetaData/GPL18280*
+Data/
+data/
+Raw/
+raw/
+
+# Large bioinformatics / analysis files
+*.fastq
+*.fq
+*.bam
+*.sam
+*.bigWig
+*.bedGraph
+*.CEL
+*.soft
+*.rds
+*.RData
+
+# Compressed archives
+*.zip
+*.tar
+*.tar.gz
+*.gz
+*.7z
+*.rar
+
+# Large generated tables/plots
+*.pdf
+*.xlsx
+
+# Python/R/cache
+__pycache__/
+.Rhistory
+.RData
+.ipynb_checkpoints/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+"@ | Set-Content .gitignore

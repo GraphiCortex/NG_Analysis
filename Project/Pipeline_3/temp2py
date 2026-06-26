@@ -1,0 +1,108 @@
+#!/usr/bin/env python3
+"""
+Make Fong-only / Oshikawa-only / Overlap gene lists per GO family.
+
+Inputs
+------
+- Project/New_Data/binding_vs_TKO_expression.xlsx
+- Project/New_Data_3/binding_vs_Oshikawa_expression.xlsx
+- Project/New_Data/GO_results.xlsx   (Sh_2 has the category tags)
+
+Outputs
+-------
+Under Project/New_Data_3/compare_fong_oshikawa/:
+  - oshi_only_<Family>.csv
+  - fong_only_<Family>.csv
+  - overlap_<Family>.csv
+  - summary_per_family.csv
+"""
+
+import os
+import pandas as pd
+
+# --- paths (adapt if you moved files) ---
+MERGED_FONG  = "Project/New_Data/binding_vs_TKO_expression.xlsx"
+MERGED_OSHI  = "Project/New_Data_3/binding_vs_Oshikawa_expression.xlsx"
+GO_XLSX      = "Project/New_Data/GO_results.xlsx"
+OUT_DIR      = "Project/New_Data_3/compare_fong_oshikawa"
+os.makedirs(OUT_DIR, exist_ok=True)
+
+FAMS = ["Apoptosis", "Autophagy", "Necroptosis", "Cell cycle", "DNA repair"]  # keep 5 for completeness
+
+# --- load merges ---
+fong = pd.read_excel(MERGED_FONG, sheet_name="All_genes")
+oshi = pd.read_excel(MERGED_OSHI, sheet_name="All_genes")
+# normalize gene symbols (upper/trim)
+for df in (fong, oshi):
+    df["Gene"] = df["Gene"].astype(str).str.upper().str.strip()
+
+# --- build gene sets per family from GO workbook (Sh_2) ---
+go_full = pd.read_excel(GO_XLSX, sheet_name="Sh_2")
+def build_set(label: str) -> set[str]:
+    df = go_full[go_full["Category"] == label]
+    if df.empty:
+        return set()
+    lists = df["geneID"].dropna().astype(str).str.split("/", expand=False)
+    return {g.strip().upper() for sub in lists for g in sub}
+
+fam_sets = {fam: build_set(fam) for fam in FAMS}
+
+def select_family(df: pd.DataFrame, fam: str) -> pd.DataFrame:
+    """Return df rows whose Gene ∈ GO family set."""
+    genes = fam_sets[fam]
+    return df[df["Gene"].isin(genes)].copy()
+
+summary_rows = []
+
+for fam in FAMS:
+    fong_fam = select_family(fong, fam)
+    oshi_fam = select_family(oshi, fam)
+
+    # base columns to keep (plus a couple stats for context)
+    keep_cols = ["Gene",
+                 "mean_logFC_expr", "adjP_expr",
+                 "mean_logFC_bind", "P_Value_bind"]
+    keep_cols = [c for c in keep_cols if c in fong_fam.columns]  # guard
+
+    # sets
+    fong_set = set(fong_fam["Gene"])
+    oshi_set = set(oshi_fam["Gene"])
+
+    overlap      = sorted(fong_set & oshi_set)
+    fong_only    = sorted(fong_set - oshi_set)
+    oshi_only    = sorted(oshi_set - fong_set)
+
+    # write CSVs
+    def write_list(name, genes, source_df):
+        out_path = os.path.join(OUT_DIR, f"{name}.csv")
+        if genes:
+            out_df = (source_df[source_df["Gene"].isin(genes)]
+                      .drop_duplicates(subset=["Gene"])
+                      .sort_values("Gene"))
+            # keep useful columns if available
+            cols = [c for c in keep_cols if c in out_df.columns]
+            out_df = out_df[["Gene"] + cols[1:]] if cols else out_df[["Gene"]]
+        else:
+            out_df = pd.DataFrame(columns=["Gene"])
+        out_df.to_csv(out_path, index=False)
+        print(f"→ Wrote {out_path} (n={len(out_df)})")
+
+    write_list(f"overlap_{fam.replace(' ', '_')}", overlap, oshi_fam)
+    write_list(f"fong_only_{fam.replace(' ', '_')}", fong_only, fong_fam)
+    write_list(f"oshi_only_{fam.replace(' ', '_')}", oshi_only, oshi_fam)
+
+    summary_rows.append({
+        "Family": fam,
+        "n_fong": len(fong_set),
+        "n_oshi": len(oshi_set),
+        "n_overlap": len(overlap),
+        "n_fong_only": len(fong_only),
+        "n_oshi_only": len(oshi_only),
+    })
+
+# summary table
+summary = pd.DataFrame(summary_rows).sort_values("Family")
+summary_path = os.path.join(OUT_DIR, "summary_per_family.csv")
+summary.to_csv(summary_path, index=False)
+print(f"\n→ Summary written: {summary_path}\n")
+print(summary.to_string(index=False))

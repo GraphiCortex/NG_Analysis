@@ -1,0 +1,13 @@
+sample_id	accession	genotype	replicate	file_path
+julian_E2F4_WT_1	GSM1326858	WT	1	Project\Data\Raw\ChipSeq\Julian2016\FE\GSM1326858_E2f4_wt_replicate1_FE.txt
+julian_E2F4_WT_2	GSM1326859	WT	2	Project\Data\Raw\ChipSeq\Julian2016\FE\GSM1326859_E2f4_wt_replicate2_FE.txt
+julian_E2F4_WT_3	GSM1326860	WT	3	Project\Data\Raw\ChipSeq\Julian2016\FE\GSM1326860_E2f4_wt_replicate3_FE.txt
+julian_E2F3_WT_1	GSM1326861	WT	1	Project\Data\Raw\ChipSeq\Julian2016\FE\GSM1326861_E2f3_wt_replicate1_FE.txt
+julian_E2F3_WT_2	GSM1326862	WT	2	Project\Data\Raw\ChipSeq\Julian2016\FE\GSM1326862_E2f3_wt_replicate2_FE.txt
+julian_E2F3_WT_3	GSM1326863	WT	3	Project\Data\Raw\ChipSeq\Julian2016\FE\GSM1326863_E2f3_wt_replicate3_FE.txt
+julian_E2F3_TKO_1	GSM1326864	TKO	1	Project\Data\Raw\ChipSeq\Julian2016\FE\GSM1326864_E2f3_3amut_replicate1_FE.txt
+julian_E2F3_TKO_2	GSM1326865	TKO	2	Project\Data\Raw\ChipSeq\Julian2016\FE\GSM1326865_E2f3_3amut_replicate2_FE.txt
+julian_E2F3_TKO_3	GSM1326866	TKO	3	Project\Data\Raw\ChipSeq\Julian2016\FE\GSM1326866_E2f3_3amut_replicate3_FE.txt
+julian_E2F4_TKO_1	GSM1326867	TKO	1	Project\Data\Raw\ChipSeq\Julian2016\FE\GSM1326867_E2f4_3amut_replicate1_FE.txt
+julian_E2F4_TKO_2	GSM1326868	TKO	2	Project\Data\Raw\ChipSeq\Julian2016\FE\GSM1326868_E2f4_3amut_replicate2_FE.txt
+julian_E2F4_TKO_3	GSM1326869	TKO	3	Project\Data\Raw\ChipSeq\Julian2016\FE\GSM1326869_E2f4_3amut_replicate3_FE.txt

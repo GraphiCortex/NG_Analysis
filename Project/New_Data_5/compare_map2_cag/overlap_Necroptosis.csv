@@ -1,0 +1,2 @@
+Gene,bind_logFC,expr_map2,adjP_map2,expr_cag,adjP_cag,sign_concordant,delta_abs_expr
+FAS,-1.347360663062983,-1.244788658888889,0.4677636468608734,-1.446516365,0.0764713521255172,True,0.2017277061111109
