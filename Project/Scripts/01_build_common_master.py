@@ -54,6 +54,8 @@ Optional:
 from __future__ import annotations
 
 import argparse
+import re
+import pandas as pd
 from copy import copy
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -144,14 +146,26 @@ class GeneRecord:
 # Small helpers
 # ---------------------------------------------------------------------
 
-def clean_gene(value) -> Optional[str]:
-    if value is None:
+def clean_gene(x):
+    if pd.isna(x):
         return None
-    value = str(value).strip()
-    if not value:
-        return None
-    return value.upper()
 
+    x = str(x).strip().upper()
+
+    if not x:
+        return None
+
+    # Canonicalize labels such as:
+    # "VNN1 (VANIN-1)" -> "VNN1"
+    x = re.sub(r"\s*\([^)]*\)\s*$", "", x)
+
+    # Reject manually written summary labels such as:
+    # "ALL THREE DATASETS"
+    # "FONG ET AL. ∩ OSHIKAWA ET AL. CAG"
+    if any(ch.isspace() for ch in x):
+        return None
+
+    return x
 
 def binary(value) -> int:
     """Return 1 only for an explicit binary 1."""
