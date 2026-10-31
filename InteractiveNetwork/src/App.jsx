@@ -1905,6 +1905,152 @@ const makeNode = useCallback(n => {
                   Earlier illustrative interactions
                 </label>
               </details>
+
+              <details className="compact-info">
+                <summary>Interaction legend</summary>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gap: "10px",
+                    marginTop: "10px"
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px"
+                    }}
+                  >
+                    <span
+                      style={{
+                        display: "inline-block",
+                        width: "28px",
+                        height: "0",
+                        borderTop: "3px solid rgba(180, 210, 255, 0.28)",
+                        opacity: 0.95
+                      }}
+                    />
+                    <span>STRING functional association</span>
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px"
+                    }}
+                  >
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        width: "32px",
+                        position: "relative"
+                      }}
+                    >
+                      <span
+                        style={{
+                          display: "inline-block",
+                          width: "24px",
+                          height: "0",
+                          borderTop: "3px solid #a8f1ff"
+                        }}
+                      />
+                      <span
+                        style={{
+                          width: 0,
+                          height: 0,
+                          borderTop: "5px solid transparent",
+                          borderBottom: "5px solid transparent",
+                          borderLeft: "8px solid #a8f1ff"
+                        }}
+                      />
+                    </span>
+                    <span>Directed database interaction</span>
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px"
+                    }}
+                  >
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        width: "32px",
+                        position: "relative"
+                      }}
+                    >
+                      <span
+                        style={{
+                          display: "inline-block",
+                          width: "24px",
+                          height: "0",
+                          borderTop: "3px solid #ff9bac"
+                        }}
+                      />
+                      <span
+                        style={{
+                          width: 0,
+                          height: 0,
+                          borderTop: "5px solid transparent",
+                          borderBottom: "5px solid transparent",
+                          borderLeft: "8px solid #ff9bac"
+                        }}
+                      />
+                    </span>
+                    <span>Inhibitory directed interaction</span>
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px"
+                    }}
+                  >
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        width: "32px",
+                        position: "relative"
+                      }}
+                    >
+                      <span
+                        style={{
+                          display: "inline-block",
+                          width: "24px",
+                          height: "0",
+                          borderTop: "3px solid #d4b3ff"
+                        }}
+                      />
+                      <span
+                        style={{
+                          width: 0,
+                          height: 0,
+                          borderTop: "5px solid transparent",
+                          borderBottom: "5px solid transparent",
+                          borderLeft: "8px solid #d4b3ff"
+                        }}
+                      />
+                    </span>
+                    <span>Earlier illustrative interaction</span>
+                  </div>
+                </div>
+
+                <p style={{ marginTop: "12px" }}>
+                  Arrow direction comes from interaction databases.
+                  It does not by itself prove that the same causal
+                  regulation was active in the Fong neural stem-cell
+                  experiment.
+                </p>
+              </details>
             </>
           )}
 
