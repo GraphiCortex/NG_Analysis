@@ -1429,18 +1429,29 @@ const makeNode = useCallback(n => {
                   : 0.9
           }
 
-          linkDirectionalArrowLength={e =>
-            e.kind === "association"
-              ? 0
-              : mode === "route"
-                ? 2.8
-                : mode === "focus" &&
-                  graphData.links.length <= 60
-                  ? 1.7
-                  : 0
-          }
+          // SCOPED_NETWORK_ARROWS
+          // Show direction in small biological networks,
+          // but avoid excessive arrow geometry in the atlas.
+          linkDirectionalArrowLength={e => {
+            if (e.kind === "association") return 0;
 
-          linkDirectionalArrowRelPos={0.87}
+            if (mode === "route") return 2.8;
+
+            if (
+              mode === "focus" &&
+              graphData.links.length <= 60
+            ) return 2.4;
+
+            if (
+              mode === "atlas" &&
+              (moduleId !== "ALL" || networkFocus !== null) &&
+              graphData.links.length <= 180
+            ) return 3.4;
+
+            return 0;
+          }}
+
+          linkDirectionalArrowRelPos={0.68}
 
           linkDirectionalArrowColor={e =>
             e.effect === "inhibition"
