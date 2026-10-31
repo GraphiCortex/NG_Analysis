@@ -1446,30 +1446,72 @@ const makeNode = useCallback(n => {
               mode === "atlas" &&
               (moduleId !== "ALL" || networkFocus !== null) &&
               graphData.links.length <= 180
-            ) return 3.4;
+            ) return 5.0;
 
             return 0;
           }}
 
-          linkDirectionalArrowRelPos={0.68}
+          // DIRECTIONAL_VISIBILITY_FIX
+          linkDirectionalArrowRelPos={0.79}
+          linkDirectionalArrowResolution={8}
 
           linkDirectionalArrowColor={e =>
-            e.effect === "inhibition"
-              ? "#f49ba9"
-              : e.kind === "route"
-                ? COLORS.ROUTE
-                : e.kind === "direct"
-                  ? "#87bae8"
-                  : "#a18cff"
+            e.effect === "inhibition" ? "#ff9bac" :
+            e.kind === "direct" ? "#a8f1ff" :
+            e.kind === "saved" ? "#d4b3ff" :
+            COLORS.ROUTE
           }
 
+          // Direction is emphasized only in small
+          // process-specific networks.
+          linkDirectionalParticles={e =>
+            mode === "atlas" &&
+            (moduleId !== "ALL" || networkFocus !== null) &&
+            graphData.links.length <= 65 &&
+            (e.kind === "direct" || e.kind === "saved")
+              ? 1 : 0
+          }
 
+          linkDirectionalParticleWidth={1.6}
+          linkDirectionalParticleSpeed={0.006}
+          linkDirectionalParticleResolution={6}
+
+          linkDirectionalParticleColor={e =>
+            e.effect === "inhibition" ? "#ff9bac" :
+            e.kind === "saved" ? "#d4b3ff" :
+            "#a8f1ff"
+          }
+
+          // Separate overlapping directed records.
           linkCurvature={e =>
-            mode === "route" &&
-            e.kind !== "association"
-              ? 0.06
-              : 0
+            mode === "route" ? 0.06 :
+            mode === "atlas" &&
+            e.kind !== "association" &&
+            graphData.links.length <= 80 &&
+            (moduleId !== "ALL" || networkFocus !== null)
+              ? 0.15 : 0
           }
+
+          // Hover to inspect the connection type.
+          linkLabel={e => {
+            const a = typeof e.source === "object"
+              ? e.source.id : e.source;
+            const b = typeof e.target === "object"
+              ? e.target.id : e.target;
+
+            if (e.kind === "association") {
+              return `${a} -- ${b} | STRING association`;
+            }
+
+            const kind =
+              e.kind === "direct"
+                ? "Directed database interaction"
+                : e.kind === "saved"
+                  ? "Earlier illustrative interaction"
+                  : "Selected route";
+
+            return `${a} -> ${b} | ${kind} | ${signText(e.effect)}`;
+          }}
 
           nodeResolution={10}
           cooldownTicks={65}
