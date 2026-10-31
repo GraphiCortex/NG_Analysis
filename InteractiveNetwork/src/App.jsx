@@ -2009,6 +2009,7 @@ const makeNode = useCallback(n => {
                 onChange={e => {
                   setModuleId(e.target.value);
                   setNetworkFocus(null);
+                  setBridgesOnly(false);
                 }}
               >
                 <option value="ALL">
@@ -2029,6 +2030,7 @@ const makeNode = useCallback(n => {
                 <input
                   type="checkbox"
                   checked={bridgesOnly}
+                  disabled={bridgeSet.size === 0}
                   onChange={e => {
                     setBridgesOnly(e.target.checked);
                     setNetworkFocus(null);
@@ -2036,6 +2038,7 @@ const makeNode = useCallback(n => {
                 />
 
                 Show connecting genes and their cell-fate links
+                {bridgeSet.size === 0 && " (none in this process)"}
               </label>
 
               <details className="layers">
