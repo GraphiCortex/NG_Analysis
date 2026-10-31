@@ -45,3 +45,7 @@ __pycache__/
 Thumbs.db
 .vscode/
 "@ | Set-Content .gitignore
+
+node_modules/
+dist/
+.vercel/
