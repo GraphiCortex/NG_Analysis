@@ -1429,26 +1429,18 @@ const makeNode = useCallback(n => {
                   : 0.9
           }
 
-          // SCOPED_NETWORK_ARROWS
-          // Show direction in small biological networks,
-          // but avoid excessive arrow geometry in the atlas.
+          // ALL_MODES_DIRECTION_V2
+          // Keep direction visible in manageable graphs.
           linkDirectionalArrowLength={e => {
-            if (e.kind === "association") return 0;
-
-            if (mode === "route") return 2.8;
-
             if (
-              mode === "focus" &&
-              graphData.links.length <= 60
-            ) return 2.4;
+              e.kind === "association" ||
+              graphData.links.length > 140
+            ) return 0;
 
-            if (
-              mode === "atlas" &&
-              (moduleId !== "ALL" || networkFocus !== null) &&
-              graphData.links.length <= 180
-            ) return 5.0;
+            if (mode === "route") return 3.1;
+            if (mode === "focus") return 2.8;
 
-            return 0;
+            return 3.8;
           }}
 
           // DIRECTIONAL_VISIBILITY_FIX
@@ -1462,14 +1454,13 @@ const makeNode = useCallback(n => {
             COLORS.ROUTE
           }
 
-          // Direction is emphasized only in small
-          // process-specific networks.
+          // Animate recorded direction in small graphs.
+          // Applies to Gene, Network and Routes.
           linkDirectionalParticles={e =>
-            mode === "atlas" &&
-            (moduleId !== "ALL" || networkFocus !== null) &&
-            graphData.links.length <= 65 &&
-            (e.kind === "direct" || e.kind === "saved")
-              ? 1 : 0
+            e.kind !== "association" &&
+            graphData.links.length <= 100
+              ? 1
+              : 0
           }
 
           linkDirectionalParticleWidth={1.6}
@@ -1478,19 +1469,24 @@ const makeNode = useCallback(n => {
 
           linkDirectionalParticleColor={e =>
             e.effect === "inhibition" ? "#ff9bac" :
+            e.kind === "route" ? COLORS.ROUTE :
             e.kind === "saved" ? "#d4b3ff" :
             "#a8f1ff"
           }
 
-          // Separate overlapping directed records.
-          linkCurvature={e =>
-            mode === "route" ? 0.06 :
-            mode === "atlas" &&
-            e.kind !== "association" &&
-            graphData.links.length <= 80 &&
-            (moduleId !== "ALL" || networkFocus !== null)
-              ? 0.15 : 0
-          }
+          // Curved directed links in every viewing mode.
+          // STRING associations remain straight.
+          linkCurvature={e => {
+            if (
+              e.kind === "association" ||
+              graphData.links.length > 140
+            ) return 0;
+
+            if (mode === "route") return 0.12;
+            if (mode === "focus") return 0.17;
+
+            return 0.15;
+          }}
 
           // Hover to inspect the connection type.
           linkLabel={e => {
@@ -1535,6 +1531,174 @@ const makeNode = useCallback(n => {
               Explore gene-expression changes in mouse
               neural stem cells alongside published
               interaction networks.
+            </p>
+          </details>
+
+          <details className="compact-info">
+            <summary>Interaction legend</summary>
+
+            <div
+              style={{
+                display: "grid",
+                gap: "10px",
+                marginTop: "10px"
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px"
+                }}
+              >
+                <span
+                  style={{
+                    display: "inline-block",
+                    width: "28px",
+                    height: "0",
+                    borderTop: "3px solid rgba(180, 210, 255, 0.28)",
+                    opacity: 0.95
+                  }}
+                />
+                <span>STRING functional association</span>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px"
+                }}
+              >
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    width: "32px",
+                    position: "relative"
+                  }}
+                >
+                  <span
+                    style={{
+                      display: "inline-block",
+                      width: "24px",
+                      height: "0",
+                      borderTop: "3px solid #a8f1ff"
+                    }}
+                  />
+                  <span
+                    style={{
+                      width: 0,
+                      height: 0,
+                      borderTop: "5px solid transparent",
+                      borderBottom: "5px solid transparent",
+                      borderLeft: "8px solid #a8f1ff"
+                    }}
+                  />
+                </span>
+                <span>Directed database interaction</span>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px"
+                }}
+              >
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    width: "32px",
+                    position: "relative"
+                  }}
+                >
+                  <span
+                    style={{
+                      display: "inline-block",
+                      width: "24px",
+                      height: "0",
+                      borderTop: "3px solid #ff9bac"
+                    }}
+                  />
+                  <span
+                    style={{
+                      width: 0,
+                      height: 0,
+                      borderTop: "5px solid transparent",
+                      borderBottom: "5px solid transparent",
+                      borderLeft: "8px solid #ff9bac"
+                    }}
+                  />
+                </span>
+                <span>Inhibitory directed interaction</span>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px"
+                }}
+              >
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    width: "32px",
+                    position: "relative"
+                  }}
+                >
+                  <span
+                    style={{
+                      display: "inline-block",
+                      width: "24px",
+                      height: "0",
+                      borderTop: "3px solid #d4b3ff"
+                    }}
+                  />
+                  <span
+                    style={{
+                      width: 0,
+                      height: 0,
+                      borderTop: "5px solid transparent",
+                      borderBottom: "5px solid transparent",
+                      borderLeft: "8px solid #d4b3ff"
+                    }}
+                  />
+                </span>
+                <span>Earlier illustrative interaction</span>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px"
+                }}
+              >
+                <span
+                  style={{
+                    color: COLORS.ROUTE,
+                    fontSize: "19px",
+                    fontWeight: "bold",
+                    width: "32px"
+                  }}
+                >
+                  &rarr;
+                </span>
+                <span>Selected illustrative route</span>
+              </div>
+            </div>
+
+            <p style={{ marginTop: "12px" }}>
+              Moving dots follow the recorded arrow direction.
+              Blue does not necessarily mean activation.
+              Pink marks database-annotated inhibition,
+              regardless of interaction source.
+              These links are not proven mechanisms
+              in the studied neural cells.
             </p>
           </details>
 
@@ -1906,151 +2070,7 @@ const makeNode = useCallback(n => {
                 </label>
               </details>
 
-              <details className="compact-info">
-                <summary>Interaction legend</summary>
 
-                <div
-                  style={{
-                    display: "grid",
-                    gap: "10px",
-                    marginTop: "10px"
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px"
-                    }}
-                  >
-                    <span
-                      style={{
-                        display: "inline-block",
-                        width: "28px",
-                        height: "0",
-                        borderTop: "3px solid rgba(180, 210, 255, 0.28)",
-                        opacity: 0.95
-                      }}
-                    />
-                    <span>STRING functional association</span>
-                  </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px"
-                    }}
-                  >
-                    <span
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        width: "32px",
-                        position: "relative"
-                      }}
-                    >
-                      <span
-                        style={{
-                          display: "inline-block",
-                          width: "24px",
-                          height: "0",
-                          borderTop: "3px solid #a8f1ff"
-                        }}
-                      />
-                      <span
-                        style={{
-                          width: 0,
-                          height: 0,
-                          borderTop: "5px solid transparent",
-                          borderBottom: "5px solid transparent",
-                          borderLeft: "8px solid #a8f1ff"
-                        }}
-                      />
-                    </span>
-                    <span>Directed database interaction</span>
-                  </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px"
-                    }}
-                  >
-                    <span
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        width: "32px",
-                        position: "relative"
-                      }}
-                    >
-                      <span
-                        style={{
-                          display: "inline-block",
-                          width: "24px",
-                          height: "0",
-                          borderTop: "3px solid #ff9bac"
-                        }}
-                      />
-                      <span
-                        style={{
-                          width: 0,
-                          height: 0,
-                          borderTop: "5px solid transparent",
-                          borderBottom: "5px solid transparent",
-                          borderLeft: "8px solid #ff9bac"
-                        }}
-                      />
-                    </span>
-                    <span>Inhibitory directed interaction</span>
-                  </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px"
-                    }}
-                  >
-                    <span
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        width: "32px",
-                        position: "relative"
-                      }}
-                    >
-                      <span
-                        style={{
-                          display: "inline-block",
-                          width: "24px",
-                          height: "0",
-                          borderTop: "3px solid #d4b3ff"
-                        }}
-                      />
-                      <span
-                        style={{
-                          width: 0,
-                          height: 0,
-                          borderTop: "5px solid transparent",
-                          borderBottom: "5px solid transparent",
-                          borderLeft: "8px solid #d4b3ff"
-                        }}
-                      />
-                    </span>
-                    <span>Earlier illustrative interaction</span>
-                  </div>
-                </div>
-
-                <p style={{ marginTop: "12px" }}>
-                  Arrow direction comes from interaction databases.
-                  It does not by itself prove that the same causal
-                  regulation was active in the Fong neural stem-cell
-                  experiment.
-                </p>
-              </details>
             </>
           )}
 
