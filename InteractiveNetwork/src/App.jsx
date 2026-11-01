@@ -1121,6 +1121,7 @@ export default function App() {
     // Double-click: ONE-HOP neighborhood within
     // the already-filtered graph.
     if (
+      !bridgesOnly &&
       networkFocus &&
       networkNodes.some(n => n.id === networkFocus)
     ) {
@@ -1154,7 +1155,7 @@ export default function App() {
       nodes: networkNodes.map(n => ({
         ...n,
         showTag:
-          !!networkFocus &&
+          !!networkFocus && !bridgesOnly &&
           (
             networkNodes.length <= 16 ||
             n.id === networkFocus
@@ -1974,7 +1975,7 @@ const makeNode = useCallback(n => {
 
           {mode === "atlas" && (
             <>
-              {networkFocus && (
+              {networkFocus && !bridgesOnly && (
                 <div className="subset-panel">
                   <strong>
                     {networkFocus}: local network
@@ -2033,7 +2034,6 @@ const makeNode = useCallback(n => {
                   disabled={bridgeSet.size === 0}
                   onChange={e => {
                     setBridgesOnly(e.target.checked);
-                    setNetworkFocus(null);
                   }}
                 />
 
