@@ -436,7 +436,6 @@ export default function App() {
 
   // Network layers.
   const [showDirect, setShowDirect] = useState(false);
-  const [showSaved, setShowSaved] = useState(false);
   const [showExternal, setShowExternal] = useState(false);
 
   const [moduleId, setModuleId] = useState("ALL");
@@ -677,7 +676,6 @@ export default function App() {
     ) {
       setShowExternal(true);
       setShowDirect(true);
-      setShowSaved(true);
     }
   }, [byId, atlas]);
 
@@ -854,13 +852,8 @@ export default function App() {
           continue;
         }
       } else if (
-        edge.kind === "direct" &&
+        (edge.kind === "direct" || edge.kind === "saved") &&
         !showDirect
-      ) {
-        continue;
-      } else if (
-        edge.kind === "saved" &&
-        !showSaved
       ) {
         continue;
       }
@@ -894,7 +887,19 @@ export default function App() {
       }
     }
 
-    return [...chosen.values()];
+    const candidate = [...chosen.values()];
+    const directedPairs = new Set(
+      candidate
+        .filter(e => e.kind !== "association")
+        .map(e => [e.source, e.target].sort().join("|"))
+    );
+
+    return candidate.filter(
+      e => e.kind !== "association" ||
+        !directedPairs.has(
+          [e.source, e.target].sort().join("|")
+        )
+    );
   }, [
     allEdges,
     mode,
@@ -902,8 +907,7 @@ export default function App() {
     focus,
     chosenSet,
     showBetween,
-    showDirect,
-    showSaved
+    showDirect
   ]);
 
   // =====================================================
@@ -1092,21 +1096,30 @@ export default function App() {
     } else {
       // Only genes annotated with the selected
       // biological process are included.
-      networkNodes = atlas.nodes.filter(
-        n =>
-          (
-            showExternal ||
-            n.tier !== "F5_EXTERNAL"
-          ) &&
-          (
-            moduleId === "ALL" ||
-            n.modules.includes(moduleId)
+      const allowed = new Set(
+        atlas.nodes
+          .filter(n =>
+            n.tier !== "F5_EXTERNAL" &&
+            (moduleId === "ALL" || n.modules.includes(moduleId))
           )
+          .map(n => n.id)
       );
 
-      const allowed = new Set(
-        networkNodes.map(n => n.id)
-      );
+      if (showDirect && showExternal) {
+        for (const edge of visualEdges) {
+          if (
+            byId.get(edge.source)?.tier === "F5_EXTERNAL" &&
+            allowed.has(edge.target)
+          ) allowed.add(edge.source);
+
+          if (
+            byId.get(edge.target)?.tier === "F5_EXTERNAL" &&
+            allowed.has(edge.source)
+          ) allowed.add(edge.target);
+        }
+      }
+
+      networkNodes = atlas.nodes.filter(n => allowed.has(n.id));
 
       networkLinks = visualEdges.filter(
         edge =>
@@ -1410,11 +1423,9 @@ const makeNode = useCallback(n => {
           linkColor={e =>
             e.kind === "route"
               ? COLORS.ROUTE
-              : e.kind === "direct"
+              : e.kind === "direct" || e.kind === "saved"
                 ? "#87bae8"
-                : e.kind === "saved"
-                  ? "#a18cff"
-                  : "#496479"
+                : "#496479"
           }
 
           linkOpacity={0.47}
@@ -1450,8 +1461,8 @@ const makeNode = useCallback(n => {
 
           linkDirectionalArrowColor={e =>
             e.effect === "inhibition" ? "#ff9bac" :
-            e.kind === "direct" ? "#a8f1ff" :
-            e.kind === "saved" ? "#d4b3ff" :
+            e.kind === "direct" || e.kind === "saved"
+              ? "#a8f1ff" :
             COLORS.ROUTE
           }
 
@@ -1471,7 +1482,6 @@ const makeNode = useCallback(n => {
           linkDirectionalParticleColor={e =>
             e.effect === "inhibition" ? "#ff9bac" :
             e.kind === "route" ? COLORS.ROUTE :
-            e.kind === "saved" ? "#d4b3ff" :
             "#a8f1ff"
           }
 
@@ -1502,9 +1512,9 @@ const makeNode = useCallback(n => {
 
             const kind =
               e.kind === "direct"
-                ? "Directed database interaction"
+                ? "Directed prior (F9F)"
                 : e.kind === "saved"
-                  ? "Earlier illustrative interaction"
+                  ? "Directed prior (earlier F5)"
                   : "Selected route";
 
             return `${a} -> ${b} | ${kind} | ${signText(e.effect)}`;
@@ -1597,7 +1607,7 @@ const makeNode = useCallback(n => {
                     }}
                   />
                 </span>
-                <span>Directed database interaction</span>
+                <span>Directed prior-knowledge interaction</span>
               </div>
 
               <div
@@ -1636,41 +1646,6 @@ const makeNode = useCallback(n => {
                 <span>Inhibitory directed interaction</span>
               </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px"
-                }}
-              >
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    width: "32px",
-                    position: "relative"
-                  }}
-                >
-                  <span
-                    style={{
-                      display: "inline-block",
-                      width: "24px",
-                      height: "0",
-                      borderTop: "3px solid #d4b3ff"
-                    }}
-                  />
-                  <span
-                    style={{
-                      width: 0,
-                      height: 0,
-                      borderTop: "5px solid transparent",
-                      borderBottom: "5px solid transparent",
-                      borderLeft: "8px solid #d4b3ff"
-                    }}
-                  />
-                </span>
-                <span>Earlier illustrative interaction</span>
-              </div>
 
               <div
                 style={{
@@ -1694,12 +1669,12 @@ const makeNode = useCallback(n => {
             </div>
 
             <p style={{ marginTop: "12px" }}>
-              Moving dots follow the recorded arrow direction.
-              Blue does not necessarily mean activation.
-              Pink marks database-annotated inhibition,
-              regardless of interaction source.
-              These links are not proven mechanisms
-              in the studied neural cells.
+              Blue arrows combine the F9F and earlier F5
+              directed priors; pink marks database-annotated
+              inhibition. A directed arrow takes visual priority
+              when STRING also links the same gene pair.
+              Moving dots indicate recorded database direction,
+              not experimentally measured neural signaling.
             </p>
           </details>
 
@@ -1932,21 +1907,9 @@ const makeNode = useCallback(n => {
                         )
                       }
                     />
-                    Directed database interactions
+                    Directed prior-knowledge interactions
                   </label>
 
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={showSaved}
-                      onChange={e =>
-                        setShowSaved(
-                          e.target.checked
-                        )
-                      }
-                    />
-                    Earlier illustrative interactions
-                  </label>
 
                   <label>
                     <input
@@ -1958,7 +1921,7 @@ const makeNode = useCallback(n => {
                         )
                       }
                     />
-                    Additional proteins
+                    Include additional prior-network proteins
                   </label>
 
                   <Note>
@@ -2037,9 +2000,18 @@ const makeNode = useCallback(n => {
                   }}
                 />
 
-                Show connecting genes and their cell-fate links
+                Show F4 connecting genes and CORE STRING links
                 {bridgeSet.size === 0 && " (none in this process)"}
               </label>
+
+              {bridgesOnly && (
+                <Note>
+                  F4 connector view: only STRING associations
+                  between selected connecting genes and CORE genes.
+                  The directed layer is temporarily hidden.
+                  Uncheck to restore your local neighborhood.
+                </Note>
+              )}
 
               <details className="layers">
                 <summary>
@@ -2050,27 +2022,32 @@ const makeNode = useCallback(n => {
                   <input
                     type="checkbox"
                     checked={showDirect}
+                    disabled={bridgesOnly}
                     onChange={e =>
                       setShowDirect(
                         e.target.checked
                       )
                     }
                   />
-                  Directed database interactions
+                  Directed prior-knowledge interactions
                 </label>
 
                 <label>
                   <input
                     type="checkbox"
-                    checked={showSaved}
-                    onChange={e =>
-                      setShowSaved(
-                        e.target.checked
-                      )
-                    }
+                    checked={showExternal}
+                    disabled={bridgesOnly || !showDirect}
+                    onChange={e => setShowExternal(e.target.checked)}
                   />
-                  Earlier illustrative interactions
+                  Include additional prior-network proteins
                 </label>
+
+                <Note>
+                  STRING associations are the baseline.
+                  The directed option combines F9F and earlier F5
+                  records without repeating the same arrow.
+                  Extra proteins appear when linked to selected genes.
+                </Note>
               </details>
 
 
